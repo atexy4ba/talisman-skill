@@ -1,0 +1,112 @@
+% ============================================================================
+% talisman branded preamble (pdflatex).
+% Fill the palette from the app's real colors (see scripts/oklch_to_hex.py) and
+% the font choices from what's actually installed (see references/environment.md).
+% Placeholders look like <<THIS>> — replace every one.
+% ============================================================================
+\usepackage[T1]{fontenc}
+
+% --- Fonts: echo the app, but only use what the LaTeX tree actually has. ---
+% The app font (Outfit / Inter / Geist ...) is usually a Google font not shippable
+% to pdflatex. Pick the closest INSTALLED family (references/environment.md has the
+% decision tree). Common working choices:
+%   geometric sans body : \usepackage[scaled=0.95]{helvet}  (Helvetica/Nimbus)
+%   geometric display    : \fontfamily{pag}\selectfont      (Avant Garde, round)
+\usepackage[scaled=0.95]{helvet}
+\renewcommand{\familydefault}{\sfdefault}          % whole doc sans, like a UI
+\newcommand{\displayfont}{\fontfamily{pag}\selectfont} % headings/cover
+
+\usepackage{geometry}
+\geometry{a4paper, margin=2.5cm}
+\usepackage{graphicx}
+\usepackage{xcolor}
+
+% --- Brand palette (replace hex with the app's real colors) ---
+\definecolor{brandmain}{HTML}{<<BRAND_MAIN>>}    % signature / logo color
+\definecolor{brandink}{HTML}{<<BRAND_INK>>}      % darkest brand shade, body ink
+\definecolor{brandaccent}{HTML}{<<BRAND_ACCENT>>}% secondary accent (rules, dots)
+\definecolor{brandalt}{HTML}{<<BRAND_ALT>>}      % tertiary accent
+\definecolor{brandgray}{HTML}{<<BRAND_GRAY>>}    % muted text
+\definecolor{brandbg}{HTML}{<<BRAND_BG_TINT>>}   % pale tint for boxes
+\definecolor{brandmainlt}{HTML}{<<BRAND_MAIN_LT>>} % light tint of brandmain
+% Semantic (keep independent of brand so status diagrams stay readable):
+\definecolor{okgreen}{HTML}{15803D}
+\definecolor{noamber}{HTML}{B45309}
+\definecolor{okgreenlt}{HTML}{DBF0E1}
+\definecolor{noamberlt}{HTML}{FBEBD5}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.multipart, fit, backgrounds, calc, shadows}
+\usepackage{eso-pic}
+
+\usepackage{listings}
+\lstdefinestyle{brandcode}{
+  basicstyle=\ttfamily\small, keywordstyle=\color{brandmain}\bfseries,
+  commentstyle=\color{brandgray}\itshape, stringstyle=\color{okgreen},
+  numbers=left, numberstyle=\tiny\color{brandgray},
+  frame=single, rulecolor=\color{brandgray!40}, backgroundcolor=\color{brandbg},
+  breaklines=true, showstringspaces=false, tabsize=2,
+}
+\lstset{style=brandcode}
+
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+  {\displayfont\huge\bfseries\color{brandink}}
+  {\displayfont\color{brandmain}\large\MakeUppercase{\chaptertitlename}\ \thechapter}{10pt}{\Huge}
+  [{\vspace{8pt}\color{brandmain}\titlerule[1.2pt]}]
+\titlespacing*{\chapter}{0pt}{0pt}{28pt}
+\titleformat{\section}{\displayfont\Large\bfseries\color{brandmain}}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\displayfont\large\bfseries\color{brandink}}{\thesubsection}{0.6em}{}
+
+\usepackage{fancyhdr}
+\setlength{\headheight}{15pt}
+% Small brand mark for the running header: white initial on a rounded square.
+\newcommand{\brandmark}{\raisebox{-1.5pt}{\tikz[baseline]{
+  \node[fill=brandmain, rounded corners=1.5pt, minimum size=3.4mm, inner sep=0pt,
+        text=white, font=\bfseries\footnotesize\displayfont] {<<LOGO_INITIAL>>};}}}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\color{brandgray}\small\thepage}
+\fancyhead[R]{\color{brandgray}\small\nouppercase{\leftmark}}
+\fancyhead[L]{\brandmark\ \color{brandink}\small\textbf{<<PRODUCT>>}\,\color{brandgray}\small <<DOC_KIND>>}
+\renewcommand{\headrulewidth}{0.8pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{brandmain}\leaders\hrule height \headrulewidth\hfill}}
+\renewcommand{\footrulewidth}{0pt}
+
+\usepackage[colorlinks=true, linkcolor=brandmain, citecolor=brandmain,
+  urlcolor=brandmain, bookmarksopen=true]{hyperref}
+
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\newtcolorbox{notebox}{
+  enhanced, breakable, colback=brandbg, colframe=brandmain, boxrule=0pt,
+  leftrule=3pt, arc=2pt, left=10pt, right=10pt, top=6pt, bottom=6pt,
+  title={\textbf{Note}}, coltitle=brandmain, fonttitle=\bfseries,
+  attach title to upper=\quad, after title={\ }}
+\newtcolorbox{warnbox}{
+  enhanced, breakable, colback=noamberlt!50, colframe=noamber, boxrule=0.5pt, arc=2pt,
+  left=10pt, right=10pt, top=6pt, bottom=6pt,
+  title={<<WARN_TITLE>>}, coltitle=white, fonttitle=\bfseries,
+  colbacktitle=noamber, attach boxed title to top left={xshift=8pt, yshift=-8pt},
+  boxed title style={arc=2pt, boxrule=0pt}}
+
+% --- Subtle branded page background (content pages). Keep opacity low so body
+% text stays crisp in print. Call \brandpagebg once, after the cover. ---
+\newcommand{\brandpagebg}{%
+  \AddToShipoutPictureBG{%
+    \begin{tikzpicture}[remember picture, overlay]
+      \fill[brandmain] (current page.north west) rectangle
+        ([xshift=3.2mm]current page.south west);
+      \fill[brandaccent] ([xshift=3.2mm]current page.north west) rectangle
+        ([xshift=4.0mm]current page.south west);
+      \begin{scope}
+        \clip (current page.south east) rectangle ([shift={(-7cm,7cm)}]current page.south east);
+        \draw[line width=10mm, brandmain, opacity=0.05]
+          ([shift={(-1cm,1cm)}]current page.south east) circle (4.2cm);
+        \fill[brandalt, opacity=0.045]
+          ([shift={(-1cm,1cm)}]current page.south east) circle (1.7cm);
+      \end{scope}
+    \end{tikzpicture}}%
+}
