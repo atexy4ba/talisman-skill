@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="icon.svg" alt="Talisman" width="160" height="160"/>
+<img src="icon.png" alt="Talisman" width="150"/>
 
 # ✦ Talisman
 
@@ -99,7 +99,7 @@ A seven-phase workflow (full detail in [`SKILL.md`](SKILL.md)):
 ```
 talisman/
 ├── SKILL.md                    # the 7-phase workflow + trigger description
-├── icon.svg                    # skill icon
+├── icon.png                    # skill icon
 ├── scripts/
 │   ├── oklch_to_hex.py         # CSS oklch() brand colors → LaTeX hex
 │   └── prepare_logo.py         # webp/png logo → PNG + sample its background color
