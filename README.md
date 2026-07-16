@@ -6,14 +6,15 @@
 
 ### Turn a codebase into a beautiful, brand-styled PDF book.
 
-*A Claude skill that reads your app and writes a polished LaTeX → PDF guide —
+*An agent playbook that reads your app and writes a polished LaTeX → PDF guide —
 with a designed cover, your real colors and logo, native diagrams, and a subtle
-branded background.*
+branded background. Works with **any coding AI agent**.*
 
 <br/>
 
 ![License](https://img.shields.io/badge/license-MIT-2227BE?style=flat-square)
-![Claude Skill](https://img.shields.io/badge/Claude-skill-8A7BFF?style=flat-square)
+![Agents](https://img.shields.io/badge/works%20with-any%20AI%20agent-8A7BFF?style=flat-square)
+![Standard](https://img.shields.io/badge/AGENTS.md-compatible-111827?style=flat-square)
 ![Engine](https://img.shields.io/badge/LaTeX-pdf-B45309?style=flat-square)
 ![Diagrams](https://img.shields.io/badge/diagrams-TikZ-15803D?style=flat-square)
 ![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)
@@ -48,26 +49,42 @@ builds to a print-ready `main.pdf`.
 
 ---
 
-## 📦 Install
+## 📦 Install & use with your agent
 
-Talisman is a [Claude](https://claude.com/claude-code) skill. Clone it into your
-skills directory:
+Talisman is a portable playbook: plain Markdown instructions
+([`AGENTS.md`](AGENTS.md) / [`SKILL.md`](SKILL.md)) plus Python scripts and LaTeX
+templates. It carries **no runtime and no agent lock-in** — any coding AI agent
+that can read files and run shell commands can drive it.
+
+Clone it once:
 
 ```bash
-git clone https://github.com/atexy4ba/talisman-skill.git ~/.claude/skills/talisman
+git clone https://github.com/atexy4ba/talisman-skill.git
 ```
 
-Then in any session, run `/talisman` — or just describe the deliverable
-("make a branded PDF guide of how this app works") and it triggers on its own.
+Then wire it into whatever you use:
+
+| Agent | How to enable |
+|---|---|
+| **Any `AGENTS.md`-aware agent** (OpenAI Codex, Cursor, Jules, …) | Drop the repo in (or beside) your project — the agent auto-reads [`AGENTS.md`](AGENTS.md). |
+| **Claude Code** | `git clone … ~/.claude/skills/talisman`, then run `/talisman`. |
+| **Cursor** | Add a rule pointing at the repo, or reference [`SKILL.md`](SKILL.md) in `.cursor/rules/`. |
+| **Windsurf** | Reference [`SKILL.md`](SKILL.md) from `.windsurfrules`. |
+| **GitHub Copilot** | Reference [`SKILL.md`](SKILL.md) from `.github/copilot-instructions.md`. |
+| **Aider** | `aider --read SKILL.md` (or `--read AGENTS.md`). |
+| **Anything else** | Tell your agent: *"Follow the Talisman workflow in `SKILL.md`."* |
+
+Then just describe the deliverable — *"make a branded PDF guide of how this app
+works"* — and the agent follows the seven-phase workflow.
 
 ---
 
 ## 🚀 Usage
 
 ```text
-You:  /talisman  build an internal guide for this codebase
+You:    build an internal guide for this codebase, in our brand style
 
-Claude:
+Agent:
   1. extracts your brand palette, logo, and fonts from the app
   2. reads the data model and features to get the content right
   3. scaffolds docs/guide/ and writes the chapters + TikZ diagrams
@@ -98,7 +115,8 @@ A seven-phase workflow (full detail in [`SKILL.md`](SKILL.md)):
 
 ```
 talisman/
-├── SKILL.md                    # the 7-phase workflow + trigger description
+├── AGENTS.md                   # cross-agent entry point (the AGENTS.md standard)
+├── SKILL.md                    # same workflow in Claude Code's skill format
 ├── icon.png                    # skill icon
 ├── scripts/
 │   ├── oklch_to_hex.py         # CSS oklch() brand colors → LaTeX hex
@@ -177,4 +195,4 @@ environment fixes are especially useful.
 
 [MIT](LICENSE) © atexy4ba
 
-<div align="center"><sub>Built for Claude Code · crafted to look like it came from your product.</sub></div>
+<div align="center"><sub>Works with any coding AI agent · crafted to look like it came from your product.</sub></div>

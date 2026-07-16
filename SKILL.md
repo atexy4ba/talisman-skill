@@ -50,8 +50,8 @@ The document should look like it came from the product. Find:
 Read the code, not the aspirational README. For a case/CRM/workflow/SaaS app the
 backbone is usually: the data model (an ORM schema / `schema.prisma` /
 migrations), the core lifecycle, the feature modules, and the integration points.
-Spawn an Explore/subagent for a thorough pass if the codebase is large. Note
-file:line references for the claims you'll make. Flag any place where two parts of
+Explore thoroughly for a large codebase (use a subagent if your agent supports
+them). Note file:line references for the claims you'll make. Flag any place where two parts of
 the code/docs disagree — surface it as a "known drift point" box rather than
 picking a side silently.
 
