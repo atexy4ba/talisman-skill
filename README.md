@@ -1,66 +1,107 @@
 <div align="center">
 
-<img src="icon.svg" alt="Talisman scroll icon" width="200" height="200"/>
+<img src="icon.svg" alt="Talisman" width="160" height="160"/>
 
-# Talisman
+# ✦ Talisman
 
-**Turn a codebase into a beautiful, accurate, brand-styled PDF book.**
+### Turn a codebase into a beautiful, brand-styled PDF book.
 
-*A Claude skill for generating polished LaTeX → PDF guides, handbooks, and whitepapers — with a designed cover page, the product's real colors and logo, native TikZ diagrams, and a subtle branded background.*
+*A Claude skill that reads your app and writes a polished LaTeX → PDF guide —
+with a designed cover, your real colors and logo, native diagrams, and a subtle
+branded background.*
+
+<br/>
+
+![License](https://img.shields.io/badge/license-MIT-2227BE?style=flat-square)
+![Claude Skill](https://img.shields.io/badge/Claude-skill-8A7BFF?style=flat-square)
+![Engine](https://img.shields.io/badge/LaTeX-pdf-B45309?style=flat-square)
+![Diagrams](https://img.shields.io/badge/diagrams-TikZ-15803D?style=flat-square)
+![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)
 
 </div>
 
 ---
 
-## What it does
+<div align="center">
 
-Point Talisman at a codebase and it produces a `docs/guide/` LaTeX project that
-builds to a print-ready `main.pdf`:
+**[What it does](#-what-it-does)** · **[Install](#-install)** · **[Usage](#-usage)** · **[How it works](#️-how-it-works)** · **[Structure](#-repository-structure)** · **[Requirements](#-requirements)**
 
-- **Grounded in the real code** — the content describes what the application
-  actually does (read from the schema, modules, and flows), not the aspirational
-  claims in a marketing README.
-- **On-brand** — it extracts the product's real palette (even from modern
-  `oklch()` CSS), its logo, and the character of its fonts, so the document looks
-  like it came from the product itself.
-- **Designed, not dumped** — a full-bleed cover page ("page de garde") with the
-  logo, colored section headings in a geometric display font, a slim branded page
-  background, and callout boxes for notes and caveats.
-- **Illustrated** — native TikZ diagrams (no Graphviz/Mermaid dependency) for
-  domain models, step-by-step flows, and state machines.
+</div>
+
+---
+
+## ✨ What it does
+
+Point Talisman at a repository and it produces a `docs/guide/` LaTeX project that
+builds to a print-ready `main.pdf`.
+
+|  | |
+|---|---|
+| 🎯 **Grounded in the real code** | Describes what the app *actually* does — read from the schema, modules, and flows — not the aspirational claims in a marketing README. |
+| 🎨 **On-brand** | Extracts the product's real palette (even modern `oklch()` CSS), its logo, and the character of its fonts, so the document looks like it came from the product. |
+| 📐 **Designed, not dumped** | A full-bleed cover page, colored headings in a geometric display font, a slim branded page background, and callout boxes for notes and caveats. |
+| 🧩 **Illustrated** | Native TikZ diagrams — domain models, step-by-step flows, and state machines — with **no** Graphviz/Mermaid dependency. |
 
 > **Why "talisman"?** A talisman is a crafted object that carries the essence of
 > the thing it represents. This skill distills a whole codebase into a single
-> artifact you can hold — hence the enchanted-scroll icon.
+> artifact you can hold.
 
-## How it works
+---
 
-The skill drives a seven-phase workflow (see [`SKILL.md`](SKILL.md) for the full
-detail):
+## 📦 Install
 
-1. **Extract the brand identity** — grep the web app's CSS/theme for the palette,
-   convert `oklch()` values to hex, find and convert the logo, note the font.
-2. **Research the real content** — read the data model, lifecycle, feature
-   modules, and integration points; decide a table of contents *by necessity*.
-3. **Scaffold the LaTeX project** — copy the templates, fill the brand
-   placeholders.
-4. **Write the chapters** — one file each, grounded in the code, with worked
-   use-cases (setup + handling walkthroughs).
-5. **Add TikZ diagrams** — domain model, at least one flow, at least one state
-   machine.
-6. **Build the cover + branded background** — full-bleed brand cover with the
-   logo; a faint edge-bar + corner watermark on content pages.
-7. **Build and verify visually** — compile with `pdflatex`, then render pages to
-   PNG and actually look, because "compiles clean" ≠ "looks right".
+Talisman is a [Claude](https://claude.com/claude-code) skill. Clone it into your
+skills directory:
 
-## Repository structure
+```bash
+git clone https://github.com/atexy4ba/talisman-skill.git ~/.claude/skills/talisman
+```
+
+Then in any session, run `/talisman` — or just describe the deliverable
+("make a branded PDF guide of how this app works") and it triggers on its own.
+
+---
+
+## 🚀 Usage
+
+```text
+You:  /talisman  build an internal guide for this codebase
+
+Claude:
+  1. extracts your brand palette, logo, and fonts from the app
+  2. reads the data model and features to get the content right
+  3. scaffolds docs/guide/ and writes the chapters + TikZ diagrams
+  4. builds the branded cover + subtle page background
+  5. compiles with pdflatex and renders pages to verify visually
+  → docs/guide/main.pdf
+```
+
+---
+
+## 🛠️ How it works
+
+A seven-phase workflow (full detail in [`SKILL.md`](SKILL.md)):
+
+<table>
+<tr><td align="center"><b>1</b></td><td><b>Extract brand identity</b><br/>Palette from CSS (<code>oklch()</code> → hex), logo, font character.</td></tr>
+<tr><td align="center"><b>2</b></td><td><b>Research real content</b><br/>Data model, lifecycle, feature modules, integration points. TOC by necessity.</td></tr>
+<tr><td align="center"><b>3</b></td><td><b>Scaffold</b><br/>Copy the templates, fill the brand placeholders.</td></tr>
+<tr><td align="center"><b>4</b></td><td><b>Write chapters</b><br/>Grounded in the code, with worked setup + handling use-cases.</td></tr>
+<tr><td align="center"><b>5</b></td><td><b>Add diagrams</b><br/>Domain model, a flow, a state machine (TikZ).</td></tr>
+<tr><td align="center"><b>6</b></td><td><b>Cover + background</b><br/>Full-bleed brand cover with the logo; faint watermark on content pages.</td></tr>
+<tr><td align="center"><b>7</b></td><td><b>Build & verify visually</b><br/>Compile, then render pages to PNG and actually look.</td></tr>
+</table>
+
+---
+
+## 📁 Repository structure
 
 ```
 talisman/
 ├── SKILL.md                    # the 7-phase workflow + trigger description
-├── icon.svg                    # this scroll icon
+├── icon.svg                    # skill icon
 ├── scripts/
-│   ├── oklch_to_hex.py         # convert CSS oklch() brand colors → LaTeX hex
+│   ├── oklch_to_hex.py         # CSS oklch() brand colors → LaTeX hex
 │   └── prepare_logo.py         # webp/png logo → PNG + sample its background color
 ├── assets/
 │   ├── preamble.tex            # branded core: fonts, palette, boxes, header, background
@@ -71,57 +112,52 @@ talisman/
     └── diagrams.md             # TikZ recipes for the 3 diagram families + anti-collision rules
 ```
 
-## Installation
+---
 
-Talisman is a [Claude](https://claude.com/claude-code) skill. Install it by
-cloning into your skills directory:
-
-```bash
-git clone https://github.com/atexy4ba/talisman-skill.git ~/.claude/skills/talisman
-```
-
-Then invoke it in a session with `/talisman`, or just describe the deliverable
-("make a branded PDF guide of how this app works") and it triggers on its own.
-
-## Requirements
+## 🧰 Requirements
 
 The skill probes the environment and adapts, but the happy path wants:
 
-| Need                | Tool                                                        |
-|---------------------|-------------------------------------------------------------|
-| PDF engine          | `pdflatex` (default; `lualatex`/`xelatex` only if their font runtime works) |
-| LaTeX packages      | `tikz`, `eso-pic`, `tcolorbox`, `hyperref`, `listings`, `booktabs` |
-| Fonts (fallback)    | `helvet`, Avant Garde (`pag`) — or the closest installed match |
-| Color conversion    | `python3`                                                   |
-| Logo conversion     | `python3` + `Pillow` (webp/png), or `rsvg-convert`/`inkscape` for svg |
-| Visual verification | `pdftoppm` (poppler)                                         |
+| Need | Tool |
+|---|---|
+| PDF engine | `pdflatex` (default; `lualatex`/`xelatex` only if their font runtime works) |
+| LaTeX packages | `tikz`, `eso-pic`, `tcolorbox`, `hyperref`, `listings`, `booktabs` |
+| Fonts (fallback) | `helvet`, Avant Garde (`pag`) — or the closest installed match |
+| Color / logo conversion | `python3` + `Pillow` (webp/png); `rsvg-convert`/`inkscape` for svg |
+| Visual verification | `pdftoppm` (poppler) |
 
-`references/environment.md` documents the fallbacks when any of these are missing
-or broken.
+`references/environment.md` documents the fallbacks when any of these are missing.
 
-## The bundled scripts
+---
 
-**`oklch_to_hex.py`** — modern apps define colors in `oklch()`, which LaTeX can't
-use. Convert them:
+## 🔧 The bundled scripts
+
+<details>
+<summary><b><code>oklch_to_hex.py</code></b> — convert modern CSS colors LaTeX can't read</summary>
 
 ```bash
 python3 scripts/oklch_to_hex.py 0.26624 0.15944 267.227
 # oklch(0.26624 0.15944 267.227) -> #090E71  rgb(9, 14, 113)
 ```
+</details>
 
-**`prepare_logo.py`** — pdflatex can't read `.webp` (common for app logos).
-Convert to PNG and get the background color for the cover color-match trick:
+<details>
+<summary><b><code>prepare_logo.py</code></b> — <code>.webp</code> logo → PNG + background color</summary>
 
 ```bash
 python3 scripts/prepare_logo.py public/logo.webp figures/logo.png
+# prints the logo's background color for the cover color-match trick
 ```
+</details>
 
-## What it encodes
+---
+
+## 🧠 What it encodes
 
 Beyond the happy path, the skill captures the messy realities of building LaTeX on
 an arbitrary machine, so future runs don't relearn them:
 
-- `pdflatex`-first (many installs have a broken `lualatex` font runtime).
+- `pdflatex`-first — many installs ship a broken `lualatex` font runtime.
 - Matching the app font's *character* with the closest installed family when the
   exact webfont isn't shippable — and saying so honestly.
 - `.webp`/`.svg` logo conversion, and the cover trick of matching the cover fill
@@ -130,6 +166,15 @@ an arbitrary machine, so future runs don't relearn them:
   lines from long code paths, multi-pass builds for cross-references.
 - **Always render to PNG and look** — the single most important verification step.
 
-## License
+---
 
-MIT.
+## 🤝 Contributing
+
+Issues and PRs welcome — new diagram recipes, font-fallback mappings, and
+environment fixes are especially useful.
+
+## 📄 License
+
+[MIT](LICENSE) © atexy4ba
+
+<div align="center"><sub>Built for Claude Code · crafted to look like it came from your product.</sub></div>
