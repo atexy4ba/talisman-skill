@@ -1,33 +1,58 @@
 #!/usr/bin/env python3
 """Prepare a logo asset for LaTeX and report its dominant background color.
 
-pdflatex can't read .webp (common for app logos) or .svg. This converts to PNG
-via Pillow and samples the corner pixel so you know the logo's background color —
-useful for the full-bleed cover trick: make the cover the SAME color as the logo's
-square background, and the monogram appears to float with no visible seam.
+Converts webp/png/jpg/bmp/gif to PNG via Pillow. For SVG, tries cairosvg or
+rsvg-convert before falling back to asking for a raster version.
 
 Usage:
-    python prepare_logo.py <input.webp|png|jpg> <output.png>
+    python prepare_logo.py <input> <output.png>
 
-For .svg logos, Pillow won't help — use `rsvg-convert`, `inkscape`, or `cairosvg`
-if available, otherwise ask the user for a raster version.
+Output: PNG file + printed background color for the cover color-match trick.
 """
+import os
+import subprocess
 import sys
-
 from PIL import Image
 
 
+def convert_svg(src, dst):
+    """Try cairosvg then rsvg-convert for SVG input."""
+    try:
+        import cairosvg
+        cairosvg.svg2png(url=src, write_to=dst)
+        return True
+    except ImportError:
+        pass
+    try:
+        subprocess.run(
+            ["rsvg-convert", "-f", "png", "-o", dst, src],
+            capture_output=True, check=True)
+        return True
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        pass
+    return False
+
+
 def main(src, dst):
-    im = Image.open(src).convert("RGBA")
+    ext = os.path.splitext(src)[1].lower()
+    if ext == ".svg":
+        if not convert_svg(src, dst):
+            sys.exit(
+                "SVG conversion failed. Install cairosvg (`pip install cairosvg`) "
+                "or rsvg-convert (`apt install librsvg2-bin`). "
+                "Alternatively provide a PNG version.")
+    else:
+        im = Image.open(src).convert("RGBA")
+        im.save(dst)
+
+    # Sample background color from converted PNG
+    im = Image.open(dst).convert("RGB")
     print("size:", im.size)
-    rgb = im.convert("RGB")
-    # sample a few corners; app icons usually have a solid background
     for name, xy in [("top-left", (2, 2)),
                      ("top-right", (im.width - 3, 2)),
                      ("center", (im.width // 2, im.height // 2))]:
-        px = rgb.getpixel(xy)
+        px = im.getpixel(xy)
         print("%-10s rgb%s -> #%02X%02X%02X" % (name, px, *px))
-    im.save(dst)
     print("saved:", dst)
 
 

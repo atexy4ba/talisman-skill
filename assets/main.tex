@@ -1,9 +1,9 @@
 % ============================================================================
 % talisman document shell + full-bleed branded cover.
-% Replace <<PLACEHOLDERS>>. The cover trick: set the cover fill to the SAME color
-% as the logo's square background so the monogram floats seamlessly. If the logo
-% has a transparent/white background instead, drop \includegraphics onto the
-% brand fill directly and skip the color-match.
+% Replace <<PLACEHOLDERS>>. Cover trick: match cover fill to logo background.
+%
+% Fast path: if chapters were written as Markdown and converted via pandoc,
+% use \input{chapters/combined} instead of individual chapter inputs.
 % ============================================================================
 \documentclass[11pt,oneside]{book}
 \input{preamble}
@@ -14,7 +14,6 @@
 \thispagestyle{empty}
 \begin{tikzpicture}[remember picture, overlay]
   \fill[brandmain] (current page.north west) rectangle (current page.south east);
-  % faint geometric accents, top-right
   \begin{scope}
     \clip (current page.north west) rectangle (current page.south east);
     \draw[line width=16mm, white, opacity=0.06]
@@ -22,23 +21,16 @@
     \fill[brandaccent, opacity=0.10]
       ([shift={(-3.2cm,-3.2cm)}]current page.north east) circle (2cm);
   \end{scope}
-
-  % logo monogram
   \node[anchor=north west] at ([shift={(2.5cm,-3cm)}]current page.north west)
     {\includegraphics[width=2.6cm]{figures/<<LOGO_FILE>>}};
-  % wordmark
   \node[anchor=west, text=white, font=\displayfont\Huge\bfseries]
     at ([shift={(5.6cm,-4.3cm)}]current page.north west) {<<PRODUCT>>};
-
-  % title block
   \node[anchor=west, text=white, font=\displayfont\fontsize{46}{50}\selectfont\bfseries]
     at ([shift={(2.5cm,-11cm)}]current page.north west) {<<TITLE>>};
   \node[anchor=west, text=brandmainlt, font=\Large]
     at ([shift={(2.6cm,-12.6cm)}]current page.north west) {<<SUBTITLE>>};
   \fill[brandaccent] ([shift={(2.6cm,-13.5cm)}]current page.north west)
     rectangle ([shift={(8.6cm,-13.7cm)}]current page.north west);
-
-  % footer meta
   \node[anchor=west, text=white, font=\bfseries]
     at ([shift={(2.5cm,3.1cm)}]current page.south west) {<<DOC_KIND>>};
   \node[anchor=west, text=brandmainlt, font=\small]
@@ -47,13 +39,19 @@
 \end{tikzpicture}
 \end{titlepage}
 
-% Enable the subtle branded background for all following (content) pages.
 \brandpagebg
 
 \tableofcontents
 
-% One \input per chapter file under chapters/.
+% Uncomment ONE of the following:
+
+% --- Option A: Individual LaTeX chapters ---
 \input{chapters/01-introduction}
-% ... add the rest ...
+\input{chapters/02-domain-model}
+\input{chapters/03-getting-started}
+% ... add remaining chapters ...
+
+% --- Option B: Fast path (pandoc-converted Markdown) ---
+% \input{chapters/combined}
 
 \end{document}

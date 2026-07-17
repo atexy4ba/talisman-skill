@@ -1,69 +1,41 @@
-# TikZ diagram recipes
+# TikZ diagram recipes (v1)
 
-Native TikZ diagrams (no graphviz/mermaid dependency) that match the brand. Three
-families cover most software docs. All assume the palette from `preamble.tex`
-(`brandmain`, `brandink`, `brandaccent`, `brandalt`, `brandgray`, plus semantic
-`okgreen`/`noamber` and their `*lt` tints).
+All assume the palette and shared styles from `preamble.tex`. Four families cover
+most software docs. Each diagram in its own `figures/<name>.tex`, `\input` from the
+chapter inside a `figure` environment.
 
-Put each diagram in its own `figures/<name>.tex` and `\input{}` it from the
-chapter inside a `figure` environment with a `\caption` and `\label`. Keeping them
-as separate files keeps chapters readable and lets you regenerate one diagram
-without touching prose.
+## Universal rules (anti-collision)
 
-## Universal rules (learned the hard way)
+1. **Never name a style `step`, `state`, `box`, `grid`, `node`** — reserved by TikZ.
+2. **Mask edge labels**: use `lbl/.style` (pre-defined in preamble) — `fill=white`
+   punches a hole behind the label.
+3. **Color-group** related nodes and add cluster captions.
+4. **Use pre-defined styles** from preamble (`spine`, `side`, `stg`, `open`, `done`,
+   `stop`) instead of redefining every time.
 
-1. **Never name a style `step`, `state`, `box`, `grid`, `node`** — reserved by
-   TikZ. Use `wizstep`, `st`, `entity`.
-2. **Mask edge labels** so they never look like they sit on a node:
-   `lbl/.style={font=\scriptsize\color{brandgray}, fill=white, inner sep=1.6pt}`.
-   The `fill=white` punches a hole in whatever's behind the label.
-3. **Subtle depth** via `\usetikzlibrary{shadows}` and
-   `drop shadow={shadow xshift=0.6pt, shadow yshift=-0.6pt, opacity=0.18}`.
-4. **Color-group** related nodes (e.g. blue spine / green cluster / amber cluster)
-   and add tiny uppercase cluster captions — it turns a node soup into a legible map.
-5. Gradient node fills read as modern: `top color=brandmainlt, bottom color=white`.
+## Family A — Domain model (ER-ish)
 
-## Family A — entity / domain model (ER-ish)
-
-A vertical "spine" of core entities with side clusters. Route edges so no label
-crosses a node; put side clusters on a clean grid.
+Vertical spine of core entities with side clusters. All styles pre-defined:
 
 ```latex
-\begin{tikzpicture}[
-    entity/.style={draw, fill=white, rounded corners=3pt, minimum width=28mm,
-      minimum height=9mm, font=\small\bfseries, align=center,
-      drop shadow={shadow xshift=0.6pt, shadow yshift=-0.6pt, opacity=0.18}},
-    spine/.style={entity, draw=brandmain, top color=brandmainlt, bottom color=white},
-    side/.style={entity, draw=brandalt, top color=brandalt!18, bottom color=white},
-    lbl/.style={font=\scriptsize\color{brandgray}, fill=white, inner sep=1.6pt},
-    arr/.style={-{Latex[length=2.2mm]}, brandgray, semithick}, x=1cm, y=1cm]
-  \node[spine] (a) at (0,6) {Workspace};
-  \node[spine] (b) at (0,4.4) {Project};
-  \node[spine] (c) at (0,2.8) {Item};
-  \node[side]  (u) at (-4.6,4.4) {User};
-  \draw[arr] (a) -- node[lbl]{contains} (b);
-  \draw[arr] (b) -- node[lbl]{has many} (c);
+\begin{tikzpicture}
+  \node[spine] (a) at (0,6) {EntityA};
+  \node[spine] (b) at (0,4.4) {EntityB};
+  \node[side]  (u) at (-4.6,4.4) {EntityC};
+  \draw[arr] (a) -- node[lbl]{relates} (b);
   \draw[arr] (b.west) -- node[lbl,pos=.55]{owned by} (u.east);
   \node[font=\scriptsize\bfseries\color{brandmain}] at (0,6.7) {CORE};
 \end{tikzpicture}
 ```
 
-Key: place child nodes so vertical edges are straight; send side-cluster edges to
-distinct anchors (`.north east`, `.south east`) so their labels don't stack.
+Add cluster labels with `\node[font=\scriptsize\bfseries\color{brandalt}]`.
 
-## Family B — linear flow / wizard / pipeline
+## Family B — Flow / wizard / pipeline
 
-Numbered stages left-to-right with badges. Good for "how to create X" steps.
+Numbered stages left-to-right with auto-badged steps:
 
 ```latex
-\begin{tikzpicture}[node distance=5mm,
-    stg/.style={draw=brandmain, top color=brandmainlt, bottom color=white,
-      rounded corners=3pt, minimum width=26mm, minimum height=13mm, align=center,
-      font=\small\bfseries, text=brandink,
-      drop shadow={shadow xshift=0.6pt, shadow yshift=-0.6pt, opacity=0.18}},
-    badge/.style={circle, fill=brandmain, text=white, font=\scriptsize\bfseries,
-      inner sep=1.4pt, minimum size=5.5mm},
-    arr/.style={-{Latex[length=2.4mm]}, brandmain, thick}]
+\begin{tikzpicture}[node distance=5mm]
   \node[stg] (s1) {First\\Step};
   \node[stg, right=of s1] (s2) {Second\\Step};
   \node[stg, right=of s2] (s3) {Third\\Step};
@@ -72,37 +44,74 @@ Numbered stages left-to-right with badges. Good for "how to create X" steps.
 \end{tikzpicture}
 ```
 
-## Family C — state machine / workflow (FSM)
+For 4+ steps, chain them with `right=of` and `node distance=4mm`.
 
-Statuses as colored states, transitions as curved labeled arrows, plus a legend.
-Use semantic colors: brand blue = active/open, green = success/terminal, amber =
-rejected/terminal.
+## Family C — State machine (FSM)
+
+Statuses as colored states with curved transitions. Semantic colors from preamble:
 
 ```latex
-\begin{tikzpicture}[node distance=18mm and 30mm,
-    st/.style={draw, rounded corners=3pt, minimum width=26mm, minimum height=12mm,
-      align=center, font=\small\bfseries, text=brandink,
-      drop shadow={shadow xshift=0.6pt, shadow yshift=-0.6pt, opacity=0.18}},
-    open/.style={st, draw=brandmain, top color=brandmainlt, bottom color=white},
-    done/.style={st, draw=okgreen, top color=okgreenlt, bottom color=white},
-    stop/.style={st, draw=noamber, top color=noamberlt, bottom color=white},
-    lbl/.style={font=\scriptsize\color{brandgray}, fill=white, inner sep=1.8pt},
-    arr/.style={-{Latex[length=2.4mm]}, brandgray, semithick}]
+\begin{tikzpicture}[node distance=18mm and 30mm]
   \node[open] (n) {NEW};
   \node[open, right=of n] (r) {REVIEW};
   \node[done, above right=8mm and 30mm of r] (a) {APPROVED};
   \node[stop, below right=8mm and 30mm of r] (x) {REJECTED};
   \draw[arr] (n) -- node[lbl,above]{submit} (r);
-  \draw[arr] (r.east) to[out=25,in=180] node[lbl,pos=.55,sloped,above]{approve} (a.west);
-  \draw[arr] (r.east) to[out=-25,in=180] node[lbl,pos=.55,sloped,below]{reject} (x.west);
+  \draw[arr] (r.east) to[out=25,in=180]
+    node[lbl,pos=.55,sloped,above]{approve} (a.west);
+  \draw[arr] (r.east) to[out=-25,in=180]
+    node[lbl,pos=.55,sloped,below]{reject} (x.west);
 \end{tikzpicture}
 ```
 
-Add small `initial`/`terminal` tags under states with a `tag` style, and a small
-swatch legend row so the color coding is self-explanatory.
+Add legend: `\diagramlegend{brandmain}{Active}{okgreen}{Success}{noamber}{Reject}`
 
-## After every diagram
+## Family D — Architecture / system layout
 
-Render the page (`pdftoppm`, see environment.md) and LOOK. The #1 defect is edge
-labels overlapping nodes — the `fill=white` mask fixes most, but crossing edges on
-a hub node still need manual re-anchoring or orthogonal routing (`-|`, `|-`).
+Box-within-box diagrams for system architecture, module nesting, or deployment:
+
+```latex
+\begin{tikzpicture}[
+    container/.style={draw=brandmain, rounded corners=4pt, thick,
+      inner sep=8pt, align=center, font=\small\bfseries},
+    component/.style={draw=brandaccent, fill=brandbg, rounded corners=2pt,
+      minimum width=20mm, minimum height=8mm, font=\small},
+    arr/.style={-{Latex[length=2.2mm]}, brandgray, semithick}]
+  \node[container] (sys) {System Name
+    \tikz{\node[component] (c1) at (0,0) {Component A};
+          \node[component] (c2) at (2.5,0) {Component B};
+          \draw[arr] (c1) -- (c2);}};
+\end{tikzpicture}
+```
+
+Or use `fit` for grouping:
+
+```latex
+\begin{tikzpicture}
+  \node[component] (db) at (0,0) {Database};
+  \node[component] (api) at (0,1.2) {API Layer};
+  \node[component] (ui) at (0,2.4) {Frontend};
+  \node[container, fit=(db)(api)(ui), label={above:Application}] {};
+  \draw[arr] (ui) -- (api);
+  \draw[arr] (api) -- (db);
+\end{tikzpicture}
+```
+
+## Time-saver: reusable fragments
+
+Shared styles are already in `preamble.tex`. For repeated diagram shapes, use
+`\tikzset` in a shared `figures/common.tex` file.
+
+## Performance: standalone diagram compilation
+
+For large documents, compile each diagram as a standalone PDF once:
+
+```bash
+for f in figures/*.tex; do
+  pdflatex -jobname="figures/$(basename $f .tex)" \
+    "\documentclass{standalone}\input{preamble}\begin{document}\input{$f}\end{document}"
+done
+```
+
+Then in chapters: `\includegraphics{figures/diagram-name}`.
+This avoids recompiling TikZ on every build run.

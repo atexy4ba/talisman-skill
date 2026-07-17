@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 """Convert CSS oklch() colors to sRGB hex.
 
-Modern web apps (Tailwind v4, shadcn) define brand colors in oklch, which LaTeX
-can't use directly. Extract the brand palette from the app's CSS, feed the values
-here, and get the hex codes for your \\definecolor lines.
-
 Usage:
-    # single color
+    # Single color
     python oklch_to_hex.py 0.26624 0.15944 267.227
 
-    # many at once, one "L C H" triple per line on stdin
-    printf '0.26624 0.15944 267.227\\n0.8936 0.1794 97.56\\n' | python oklch_to_hex.py
+    # From stdin (one "L C H" triple per line)
+    printf '0.26624 0.15944 267.227\n0.8936 0.1794 97.56\n' | python oklch_to_hex.py
 
-L is 0..1 (percentages: divide by 100). C is chroma (~0..0.4). H is hue degrees.
+    # Auto-extract from CSS (grep oklch values)
+    grep -oP 'oklch\\([^)]+\\)' app.css | python oklch_to_hex.py --css
+
+L is 0..1. C is chroma (~0..0.4). H is hue degrees.
 """
 import math
+import re
 import sys
 
 
@@ -37,6 +37,18 @@ def oklch_to_srgb(L, C, h_deg):
     return tuple(round(f(v) * 255) for v in (r, g, bl))
 
 
+def parse_oklch(s):
+    """Parse 'oklch(0.26624 0.15944 267.227)' or with percentages."""
+    s = s.strip().removeprefix("oklch(").removesuffix(")")
+    parts = s.split()
+    if len(parts) >= 3:
+        L = float(parts[0].replace("%", "")) / 100 if "%" in parts[0] else float(parts[0])
+        C = float(parts[1])
+        H = float(parts[2].replace("%", ""))
+        return L, C, H
+    return None
+
+
 def emit(L, C, h):
     r, g, b = oklch_to_srgb(L, C, h)
     print("oklch(%.5f %.5f %.3f) -> #%02X%02X%02X  rgb(%d, %d, %d)"
@@ -44,10 +56,19 @@ def emit(L, C, h):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 4:
-        emit(float(sys.argv[1]), float(sys.argv[2]), float(sys.argv[3]))
+    css_mode = "--css" in sys.argv
+    args = [a for a in sys.argv[1:] if a != "--css"]
+
+    if len(args) == 3:
+        emit(float(args[0]), float(args[1]), float(args[2]))
     else:
         for line in sys.stdin:
-            parts = line.split()
-            if len(parts) == 3:
-                emit(float(parts[0]), float(parts[1]), float(parts[2]))
+            if css_mode:
+                for match in re.finditer(r'oklch\([^)]+\)', line):
+                    parsed = parse_oklch(match.group())
+                    if parsed:
+                        emit(*parsed)
+            else:
+                parts = line.split()
+                if len(parts) == 3:
+                    emit(float(parts[0]), float(parts[1]), float(parts[2]))

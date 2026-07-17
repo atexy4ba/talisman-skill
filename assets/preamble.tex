@@ -1,55 +1,116 @@
 % ============================================================================
 % talisman branded preamble (pdflatex).
-% Fill the palette from the app's real colors (see scripts/oklch_to_hex.py) and
-% the font choices from what's actually installed (see references/environment.md).
-% Placeholders look like <<THIS>> — replace every one.
+% Fill placeholder from the app's real colors and fonts.
+% Placeholders: <<BRAND_MAIN>> <<BRAND_INK>> <<BRAND_ACCENT>> <<BRAND_ALT>>
+%               <<BRAND_GRAY>> <<BRAND_BG_TINT>> <<BRAND_MAIN_LT>>
+%               <<LOGO_INITIAL>> <<PRODUCT>> <<DOC_KIND>> <<WARN_TITLE>>
 % ============================================================================
 \usepackage[T1]{fontenc}
 
-% --- Fonts: echo the app, but only use what the LaTeX tree actually has. ---
-% The app font (Outfit / Inter / Geist ...) is usually a Google font not shippable
-% to pdflatex. Pick the closest INSTALLED family (references/environment.md has the
-% decision tree). Common working choices:
-%   geometric sans body : \usepackage[scaled=0.95]{helvet}  (Helvetica/Nimbus)
-%   geometric display    : \fontfamily{pag}\selectfont      (Avant Garde, round)
+% --- Fonts ----------------------------------------------------------------
 \usepackage[scaled=0.95]{helvet}
-\renewcommand{\familydefault}{\sfdefault}          % whole doc sans, like a UI
-\newcommand{\displayfont}{\fontfamily{pag}\selectfont} % headings/cover
+\renewcommand{\familydefault}{\sfdefault}
+\newcommand{\displayfont}{\fontfamily{pag}\selectfont}
 
 \usepackage{geometry}
-\geometry{a4paper, margin=2.5cm}
+\geometry{a4paper, margin=2.5cm, headsep=1.2cm}
 \usepackage{graphicx}
 \usepackage{xcolor}
 
-% --- Brand palette (replace hex with the app's real colors) ---
-\definecolor{brandmain}{HTML}{<<BRAND_MAIN>>}    % signature / logo color
-\definecolor{brandink}{HTML}{<<BRAND_INK>>}      % darkest brand shade, body ink
-\definecolor{brandaccent}{HTML}{<<BRAND_ACCENT>>}% secondary accent (rules, dots)
-\definecolor{brandalt}{HTML}{<<BRAND_ALT>>}      % tertiary accent
-\definecolor{brandgray}{HTML}{<<BRAND_GRAY>>}    % muted text
-\definecolor{brandbg}{HTML}{<<BRAND_BG_TINT>>}   % pale tint for boxes
-\definecolor{brandmainlt}{HTML}{<<BRAND_MAIN_LT>>} % light tint of brandmain
-% Semantic (keep independent of brand so status diagrams stay readable):
+% --- Brand palette (fill with app's real colors) --------------------------
+\definecolor{brandmain}{HTML}{<<BRAND_MAIN>>}
+\definecolor{brandink}{HTML}{<<BRAND_INK>>}
+\definecolor{brandaccent}{HTML}{<<BRAND_ACCENT>>}
+\definecolor{brandalt}{HTML}{<<BRAND_ALT>>}
+\definecolor{brandgray}{HTML}{<<BRAND_GRAY>>}
+\definecolor{brandbg}{HTML}{<<BRAND_BG_TINT>>}
+\definecolor{brandmainlt}{HTML}{<<BRAND_MAIN_LT>>}
+% Semantic (kept independent of brand palette):
 \definecolor{okgreen}{HTML}{15803D}
 \definecolor{noamber}{HTML}{B45309}
 \definecolor{okgreenlt}{HTML}{DBF0E1}
 \definecolor{noamberlt}{HTML}{FBEBD5}
 
+% --- TikZ ----------------------------------------------------------------
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta, positioning, shapes.multipart, fit, backgrounds, calc, shadows}
+\usetikzlibrary{arrows.meta, positioning, shapes.multipart, fit, backgrounds, calc, shadows, svg.path, decorations.pathmorphing, matrix, chains, shapes.geometric}
 \usepackage{eso-pic}
-
-\usepackage{listings}
-\lstdefinestyle{brandcode}{
-  basicstyle=\ttfamily\small, keywordstyle=\color{brandmain}\bfseries,
-  commentstyle=\color{brandgray}\itshape, stringstyle=\color{okgreen},
-  numbers=left, numberstyle=\tiny\color{brandgray},
-  frame=single, rulecolor=\color{brandgray!40}, backgroundcolor=\color{brandbg},
-  breaklines=true, showstringspaces=false, tabsize=2,
+\tikzset{
+  >=Latex,
+  every picture/.style={/tikz/semithick},
+  % --- Shared diagram styles ---
+  entity/.style={draw, fill=white, rounded corners=3pt, minimum width=28mm,
+    minimum height=9mm, font=\small\bfseries, align=center,
+    drop shadow={shadow xshift=0.6pt, shadow yshift=-0.6pt, opacity=0.18}},
+  spine/.style={entity, draw=brandmain, top color=brandmainlt, bottom color=white},
+  side/.style={entity, draw=brandalt, top color=brandalt!18, bottom color=white},
+  lbl/.style={font=\scriptsize\color{brandgray}, fill=white, inner sep=1.6pt},
+  arr/.style={-{Latex[length=2.2mm]}, brandgray, semithick},
+  % State machine styles
+  st/.style={draw, rounded corners=3pt, minimum width=26mm, minimum height=12mm,
+    align=center, font=\small\bfseries,
+    drop shadow={shadow xshift=0.6pt, shadow yshift=-0.6pt, opacity=0.18}},
+  open/.style={st, draw=brandmain, top color=brandmainlt, bottom color=white},
+  done/.style={st, draw=okgreen, top color=okgreenlt, bottom color=white},
+  stop/.style={st, draw=noamber, top color=noamberlt, bottom color=white},
+  % Flow styles
+  stg/.style={draw=brandmain, top color=brandmainlt, bottom color=white,
+    rounded corners=3pt, minimum width=26mm, minimum height=13mm, align=center,
+    font=\small\bfseries,
+    drop shadow={shadow xshift=0.6pt, shadow yshift=-0.6pt, opacity=0.18}},
+  badge/.style={circle, fill=brandmain, text=white, font=\scriptsize\bfseries,
+    inner sep=1.4pt, minimum size=5.5mm},
 }
-\lstset{style=brandcode}
+% --- Legend macro for diagrams ---
+\newcommand{\diagramlegend}[5]{
+  \begin{tikzpicture}[baseline]
+    \fill[#1] (0,0) rectangle (0.4,0.4);
+    \node[right] at (0.5,0.2) {\scriptsize #2};
+    \fill[#3] (1.8,0) rectangle (2.2,0.4);
+    \node[right] at (2.3,0.2) {\scriptsize #4};
+    \ifx&#5&\else
+      \fill[#5] (3.6,0) rectangle (4.0,0.4);
+      \node[right] at (4.1,0.2) {\scriptsize ...};
+    \fi
+  \end{tikzpicture}
+}
+
+% --- Code listings (minted preferred, listings fallback) ------------------
+\IfFileExists{minted.sty}{
+  \usepackage[newfloat]{minted}
+  \setminted{style=friendly, breaklines=true, tabsize=2,
+            fontsize=\small, frame=single,
+            framesep=4mm, baselinestretch=1.1,
+            bgcolor=brandbg}
+  \SetupFloatingEnvironment{listing}{name=Listing}
+}{
+  \usepackage{listings}
+  \lstdefinestyle{brandcode}{
+    basicstyle=\ttfamily\small, keywordstyle=\color{brandmain}\bfseries,
+    commentstyle=\color{brandgray}\itshape, stringstyle=\color{okgreen},
+    numbers=left, numberstyle=\tiny\color{brandgray},
+    frame=single, rulecolor=\color{brandgray!40}, backgroundcolor=\color{brandbg},
+    breaklines=true, showstringspaces=false, tabsize=2,
+  }
+  \lstset{style=brandcode}
+}
 
 \usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{colortbl}
+\usepackage{array}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\newcommand{\thead}[1]{\multicolumn{1}{c}{\bfseries\color{white}\small #1}}
+\newcommand{\theadfirst}[1]{\multicolumn{1}{c}{\bfseries\color{white}\small #1}}
+\newcommand{\theadrest}[1]{\multicolumn{1}{c}{\bfseries\color{white}\small #1}}
+\newenvironment{brandtable}[1]{
+  \rowcolors{2}{brandbg}{white}
+  \begin{tabular}{#1}
+  \rowcolor{brandmain}
+}{
+  \bottomrule
+  \end{tabular}
+}
 \usepackage{enumitem}
 \usepackage{titlesec}
 \titleformat{\chapter}[display]
@@ -62,7 +123,6 @@
 
 \usepackage{fancyhdr}
 \setlength{\headheight}{15pt}
-% Small brand mark for the running header: white initial on a rounded square.
 \newcommand{\brandmark}{\raisebox{-1.5pt}{\tikz[baseline]{
   \node[fill=brandmain, rounded corners=1.5pt, minimum size=3.4mm, inner sep=0pt,
         text=white, font=\bfseries\footnotesize\displayfont] {<<LOGO_INITIAL>>};}}}
@@ -92,8 +152,7 @@
   colbacktitle=noamber, attach boxed title to top left={xshift=8pt, yshift=-8pt},
   boxed title style={arc=2pt, boxrule=0pt}}
 
-% --- Subtle branded page background (content pages). Keep opacity low so body
-% text stays crisp in print. Call \brandpagebg once, after the cover. ---
+% --- Subtle branded page background --------------------------------------
 \newcommand{\brandpagebg}{%
   \AddToShipoutPictureBG{%
     \begin{tikzpicture}[remember picture, overlay]

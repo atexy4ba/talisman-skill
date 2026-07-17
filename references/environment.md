@@ -1,86 +1,92 @@
-# Environment & toolchain fallbacks
+# Environment & toolchain fallbacks (optimized)
 
 Talisman targets the messy reality of a random machine's LaTeX install. Probe
-first, then pick the path that works. Don't assume a clean TeX Live.
+first, pick the path that works. Don't assume a clean TeX Live.
 
-## Probe before you build
+## Probe script (run once)
 
 ```bash
-which pdflatex lualatex xelatex tectonic pandoc      # engines
-kpsewhich tikz.sty eso-pic.sty tcolorbox.sty         # required packages
-kpsewhich helvet.sty avant.sty                        # fallback fonts
-which convert magick dwebp inkscape rsvg-convert      # image tools
-python3 -c "import PIL; print('PIL ok')"              # logo conversion fallback
+echo "=== Engines ==="
+which pdflatex lualatex xelatex tectonic latexmk pandoc 2>/dev/null
+echo "=== Packages ==="
+for p in tikz eso-pic tcolorbox hyperref listings minted booktabs; do
+  kpsewhich $p.sty >/dev/null 2>&1 && echo "  $p ✓" || echo "  $p ✗"
+done
+echo "=== Fonts ==="
+for f in helvet avant sourcecodepro inconsolata; do
+  kpsewhich $f.sty >/dev/null 2>&1 && echo "  $f ✓" || echo "  $f ✗"
+done
+echo "=== Image tools ==="
+which convert magick dwebp inkscape rsvg-convert cairosvg 2>/dev/null
+python3 -c "import PIL; print('  PIL ✓')" 2>/dev/null || echo "  PIL ✗"
+echo "=== PDF tools ==="
+which pdftotext pdftoppm pdfjam 2>/dev/null
 ```
 
-## Engine choice
+## Engine fallback chain
 
-**Default to `pdflatex`.** It's the most reliably installed and needs no font
-runtime. Use `lualatex`/`xelatex` (with `fontspec`) ONLY if you both (a) have the
-real app font TTFs and (b) confirmed the Unicode engine actually loads fonts.
+```
+tectonic --available
+  ? fastest: auto-resolves packages, single pass
+  ! no shell escape, no minted (pygments)
+latexmk --auto-pass-count
+  ? smart: runs pdflatex/lualatex exactly enough times
+  ! requires full TeX Live
+pdflatex --3-pass-fallback
+  ? works everywhere, safest
+  ! slowest, manual pass count
+lualatex/xelatex --only-if-fontspec-works
+  ? needed for real TTF/OTF fonts
+  ! trap: luaotfload-main missing → fontspec dead
+```
 
-Common trap: `lualatex` is present but `luaotfload-main` is missing —
-`find / -name "luaotfload-main.lua"` returns nothing. Then `fontspec` is dead and
-lualatex can't load any font. Don't fight it; use pdflatex.
+**Recommendation**: `latexmk -pdf` for reliability + speed. Fallback to 3x pdflatex
+only if latexmk is absent.
 
-## Fonts: echo the app without the app's font files
+## Large codebase optimization
 
-App fonts (Outfit, Inter, Geist, Satoshi, ...) are almost always Google/webfonts
-not shippable to pdflatex, and there's usually no network to fetch them. Match the
-*character* of the font with the closest INSTALLED family:
+For repos >500k LOC (Odoo, ERP, monorepos):
 
-| App font style        | Closest pdflatex family (package)         |
-|-----------------------|-------------------------------------------|
-| geometric sans        | Avant Garde `\fontfamily{pag}` (round)    |
-| neutral/grotesque sans| Helvetica `helvet` (Nimbus Sans)          |
-| humanist sans         | `helvet` scaled, or `lato`/`sourcesanspro` if installed |
-| default fallback      | Latin Modern (`lmodern`)                  |
+| Tactic | How |
+|--------|-----|
+| Skip node_modules/.git/.tox | `find . -path '*/node_modules' -prune -o ...` |
+| Schema-first | Read models/ or ORM definitions, not every file |
+| Module grep | `find . -name '__init__.py' -maxdepth 3` to find modules |
+| Parallel research | One subagent per module area |
+| Markdown fast path | Write in .md, convert via pandoc |
+| Standalone diagrams | `\input` compiles each time; cache as PDF instead |
+| Memory | Split into multiple small chapters, not one giant file |
 
-Make the whole document sans (`\renewcommand{\familydefault}{\sfdefault}`) so it
-reads like a product UI. Use a geometric display font for headings/cover only —
-mixing one clean body sans + one distinctive display face looks intentional.
+## Font fallback table
 
-Record the substitution in a comment in `preamble.tex` — it's the one honest gap
-vs. "use the exact app font", and the user should be able to see the reasoning.
+| App font style | Closest pdflatex family (package) |
+|----------------|-----------------------------------|
+| geometric sans | Avant Garde `\fontfamily{pag}` |
+| neutral/grotesque | Helvetica `helvet` (Nimbus Sans) |
+| humanist sans | `helvet` scaled, or `lato`/`sourcesanspro` if installed |
+| monospace (code) | `inconsolata` / `sourcecodepro` / `plex-mono` |
+| default fallback | Latin Modern (`lmodern`) |
 
-For code listings: prefer `inconsolata`/`sourcecodepro`/`plex-mono` if installed
-(closest to JetBrains/IBM Plex Mono); otherwise the default typewriter is fine.
+## Compile-error playbook
 
-## Logo conversion
-
-pdflatex reads PDF/PNG/JPG, NOT webp or svg (both common for app logos).
-- webp/png/jpg → PNG: `scripts/prepare_logo.py` (Pillow). It also prints the
-  logo's background color — use it for the cover color-match trick.
-- svg → PDF: `rsvg-convert -f pdf`, `inkscape --export-type=pdf`, or `cairosvg`.
-  If none exist and it's simple (a monogram), consider redrawing it in TikZ.
-
-## Compile-error playbook (seen in practice)
-
-- **`The key '/tikz/step' requires a value`** — `step`, `state`, `box`, `grid`
-  are reserved TikZ words. Rename your node styles (`wizstep`, `st`, `entity`).
-- **`Undefined control sequence \lbl`** inside a node — a `lbl/.style` is a TikZ
-  *style*, not a text macro. Don't put `\lbl{...}` in node text; use
-  `{\scriptsize\color{...} label}` instead.
-- **Overfull \hbox** from long code paths like `apps/web/.../Foo.tsx` — wrap in
-  `\url{...}` (with `hyperref`) so it breaks, instead of `\texttt{...}`.
+- **`The key '/tikz/step' requires a value`** — rename styles (`wizstep`, `st`).
+- **`Undefined control sequence \lbl`** — use `{\scriptsize\color{...} label}`.
+- **Overfull \hbox** from long paths — use `\url{...}` instead of `\texttt{...}`.
 - **`\headheight is too small`** — `\setlength{\headheight}{15pt}`.
-- **Undefined references / `??` in output** — needs another pass. The Makefile
-  runs pdflatex 3× on purpose (refs + TOC shift + tikz overlay). Verify with
-  `pdftotext main.pdf - | grep -c '??'` → must be 0.
-- **`remember picture` overlay misplaced on first build** — it needs two passes;
-  the 3-pass Makefile handles it.
+- **`??` in output** — needs another pass. `pdftotext main.pdf - | grep -c '??'` → 0.
+- **`! Package minted Error: You must have `pygmentize' installed`** — falls back to
+  `listings` automatically (autodetected in preamble.tex).
+- **`Fatal error occurred, no output PDF file produced!`** — run with
+  `-interaction=nonstopmode` to see all errors at once.
 
-## Verify visually — always
-
-LaTeX "compiles clean" and still looks broken (overlapping diagram labels,
-blended logo edges, color clashes). After building, render pages to PNG and
-actually look:
+## Visual verification
 
 ```bash
-pdftoppm -png -r 95 -f 1 -l 1 main.pdf /tmp/pg_cover   # cover
-pdftoppm -png -r 95 -f 5 -l 8 main.pdf /tmp/pg         # diagram/content pages
+latexmk -pdf main.pdf 2>&1 | tail -5
+pdftotext main.pdf - | grep -c '??'
+pdftoppm -png -r 95 -f 1 -l 1 main.pdf /tmp/cover
+pdftoppm -png -r 95 -f 3 -l 6 main.pdf /tmp/content
 ```
 
-Then read the PNGs. Check: cover logo/title, every diagram for label collisions,
-the branded background isn't too heavy, headings use the display font, TOC page
-numbers resolved.
+Check: cover logo/title, diagram labels, background opacity, heading fonts, TOC
+page numbers, no `??` markers.
