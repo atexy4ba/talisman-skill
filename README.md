@@ -12,12 +12,18 @@ branded background. Works with **any coding AI agent**.*
 
 <br/>
 
+[![skills.sh](https://img.shields.io/badge/skills.sh-install-000000?style=flat-square)](https://www.skills.sh)
 ![License](https://img.shields.io/badge/license-MIT-2227BE?style=flat-square)
 ![Agents](https://img.shields.io/badge/works%20with-any%20AI%20agent-8A7BFF?style=flat-square)
 ![Standard](https://img.shields.io/badge/AGENTS.md-compatible-111827?style=flat-square)
 ![Engine](https://img.shields.io/badge/LaTeX-pdf-B45309?style=flat-square)
 ![Diagrams](https://img.shields.io/badge/diagrams-TikZ-15803D?style=flat-square)
-![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)
+
+<br/>
+
+```bash
+npx skills add atexy4ba/talisman-skill
+```
 
 </div>
 
@@ -49,20 +55,32 @@ builds to a print-ready `main.pdf`.
 
 ---
 
-## 📦 Install & use with your agent
+## 📦 Install
 
-Talisman is a portable playbook: plain Markdown instructions
+### One command (recommended)
+
+Talisman is on [**skills.sh**](https://www.skills.sh). The
+[`skills`](https://github.com/vercel-labs/skills) CLI detects your agent and
+installs it in the right place automatically:
+
+```bash
+npx skills add atexy4ba/talisman-skill
+```
+
+That's it — works with Claude Code, Cursor, Codex, Windsurf, and every other agent
+the CLI supports. Manage it with `npx skills list` / `update` / `remove`, and find
+it any time with `npx skills find talisman`.
+
+### Manual / per-agent
+
+Talisman is also just a portable playbook — plain Markdown instructions
 ([`AGENTS.md`](AGENTS.md) / [`SKILL.md`](SKILL.md)) plus Python scripts and LaTeX
-templates. It carries **no runtime and no agent lock-in** — any coding AI agent
-that can read files and run shell commands can drive it.
-
-Clone it once:
+templates, with **no runtime and no agent lock-in**. If you'd rather wire it in by
+hand, clone it:
 
 ```bash
 git clone https://github.com/atexy4ba/talisman-skill.git
 ```
-
-Then wire it into whatever you use:
 
 | Agent | How to enable |
 |---|---|
