@@ -78,8 +78,14 @@ Talisman is also just a portable playbook — plain Markdown instructions
 templates, with **no runtime and no agent lock-in**. If you'd rather wire it in by
 hand, clone it:
 
+> ⚠️ **Security notice**: The cloned `AGENTS.md`/`SKILL.md` files directly
+> control agent behavior at runtime. Always verify the source repository's
+> integrity before trusting the skill with agent execution. Pin to a known-good
+> commit or tag, and audit the instructions after cloning:
+
 ```bash
-git clone https://github.com/atexy4ba/talisman-skill.git
+# Pin to a known-good commit
+git clone https://github.com/atexy4ba/talisman-skill.git && cd talisman-skill && git checkout <commit-hash>
 ```
 
 | Agent | How to enable |
