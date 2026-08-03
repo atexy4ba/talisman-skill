@@ -21,6 +21,10 @@ branded background. Works with **any coding AI agent**.*
 
 <br/>
 
+[![Star History](https://api.star-history.com/svg?repos=atexy4ba/talisman-skill&type=Date)](https://star-history.com/#atexy4ba/talisman-skill&Date)
+
+<br/>
+
 ```bash
 npx skills add atexy4ba/talisman-skill
 ```
