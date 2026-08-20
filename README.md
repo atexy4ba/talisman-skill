@@ -21,12 +21,12 @@ branded background. Works with **any coding AI agent**.*
 
 <br/>
 
-[![Star History](https://api.star-history.com/svg?repos=atexy4ba/talisman-skill&type=Date)](https://star-history.com/#atexy4ba/talisman-skill&Date)
+[![Star History](https://api.star-history.com/svg?repos=jeunecraack/talisman-skill&type=Date)](https://star-history.com/#jeunecraack/talisman-skill&Date)
 
 <br/>
 
 ```bash
-npx skills add atexy4ba/talisman-skill
+npx skills add jeunecraack/talisman-skill
 ```
 
 </div>
@@ -68,7 +68,7 @@ Talisman is on [**skills.sh**](https://www.skills.sh). The
 installs it in the right place automatically:
 
 ```bash
-npx skills add atexy4ba/talisman-skill
+npx skills add jeunecraack/talisman-skill
 ```
 
 That's it — works with Claude Code, Cursor, Codex, Windsurf, and every other agent
@@ -89,7 +89,7 @@ hand, clone it:
 
 ```bash
 # Pin to a known-good commit
-git clone https://github.com/atexy4ba/talisman-skill.git && cd talisman-skill && git checkout <commit-hash>
+git clone https://github.com/jeunecraack/talisman-skill.git && cd talisman-skill && git checkout <commit-hash>
 ```
 
 | Agent | How to enable |
@@ -221,6 +221,6 @@ environment fixes are especially useful.
 
 ## 📄 License
 
-[MIT](LICENSE) © atexy4ba
+[MIT](LICENSE) © jeunecraack
 
 <div align="center"><sub>Works with any coding AI agent · crafted to look like it came from your product.</sub></div>
