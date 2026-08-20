@@ -75,7 +75,18 @@
   \end{tikzpicture}
 }
 
-% --- Code listings (minted preferred, listings fallback) ------------------
+% --- Code listings --------------------------------------------------------
+% listings is always loaded so \begin{lstlisting} (used by chapter_template.tex)
+% works everywhere; minted is set up in addition when available.
+\usepackage{listings}
+\lstdefinestyle{brandcode}{
+  basicstyle=\ttfamily\small, keywordstyle=\color{brandmain}\bfseries,
+  commentstyle=\color{brandgray}\itshape, stringstyle=\color{okgreen},
+  numbers=left, numberstyle=\tiny\color{brandgray},
+  frame=single, rulecolor=\color{brandgray!40}, backgroundcolor=\color{brandbg},
+  breaklines=true, showstringspaces=false, tabsize=2,
+}
+\lstset{style=brandcode}
 \IfFileExists{minted.sty}{
   \usepackage[newfloat]{minted}
   \setminted{style=friendly, breaklines=true, tabsize=2,
@@ -83,17 +94,7 @@
             framesep=4mm, baselinestretch=1.1,
             bgcolor=brandbg}
   \SetupFloatingEnvironment{listing}{name=Listing}
-}{
-  \usepackage{listings}
-  \lstdefinestyle{brandcode}{
-    basicstyle=\ttfamily\small, keywordstyle=\color{brandmain}\bfseries,
-    commentstyle=\color{brandgray}\itshape, stringstyle=\color{okgreen},
-    numbers=left, numberstyle=\tiny\color{brandgray},
-    frame=single, rulecolor=\color{brandgray!40}, backgroundcolor=\color{brandbg},
-    breaklines=true, showstringspaces=false, tabsize=2,
-  }
-  \lstset{style=brandcode}
-}
+}{}
 
 \usepackage{booktabs}
 \usepackage{tabularx}
